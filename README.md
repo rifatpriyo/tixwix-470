@@ -1,190 +1,170 @@
 # TixWix
 
-**CSE470 · Sprint 1, Division 1**
+**CSE470 Software Engineering Project · Sprint 1, Division 1**
 
-This milestone implements accounts, protected roles, customer host applications, administrator reviews, and approved-host access. A customer keeps the same account after approval. Event creation, discovery, ticket booking, event moderation, and Flutter screens are deliberately outside this division. Only the host-verification portion of SRS feature F17 is implemented.
+An event platform being developed in stages. This milestone delivers the complete **customer account → host application → administrator review → approved-host access** workflow using a live Supabase backend.
 
-Repository: [rifatpriyo/tixwix-470](https://github.com/rifatpriyo/tixwix-470). The completed milestone is available on `main` and `feature/sprint-1-division-1`.
+[![Division 1 checks](https://github.com/rifatpriyo/tixwix-470/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rifatpriyo/tixwix-470/actions/workflows/ci.yml)
 
-## Work completed so far
+[Features](#implemented-features) · [Architecture](#architecture) · [Run locally](#run-locally) · [Verification](#verification) · [Demonstration](#faculty-demonstration) · [Documentation](#documentation)
 
-- Set up Next.js App Router, TypeScript, React, Tailwind CSS, shadcn/ui, and the Supabase integration.
-- Implemented customer registration, login, logout, persistent sessions, and email-confirmation callbacks.
-- Added protected customer, host, and administrator roles, with server authorization and database Row Level Security.
-- Built the host application form, pending/approved/rejected statuses, rejection feedback, and corrected resubmission with preserved history.
-- Built administrator application filtering, detail views, review history, and approval/rejection decisions. Approval grants host access atomically while retaining customer access.
-- Created the landing page, authentication screens, customer dashboard, application page, host dashboard, and admin review pages with responsive layouts.
-- Added SQL migrations, a guarded administrator bootstrap procedure, reusable JSON APIs, a CI workflow, and setup/architecture/deployment documentation.
+![TixWix landing page showing account registration and organizer onboarding](docs/images/homepage.png)
 
-**Verified:** lint, TypeScript, production build, 29 unit/database tests, 10 desktop/mobile browser tests, three real Supabase integration tests, and the live browser registration-to-approved-host workflow all passed. The production dependency audit reported zero vulnerabilities.
+_Actual application screenshot captured locally. The concert image is decorative; event listings and ticket booking belong to later milestones._
 
-**Live Supabase setup:** project `euuastddghdsyodcnfhp` is connected locally, the Division 1 migration is applied and recorded, and all three real Supabase integration tests passed. Email confirmation is disabled at the owner's request for local testing, so new accounts receive a session immediately. Authentication-provider unit tests still use mocks; the separate integration suite uses the actual hosted database and Auth service. A permanent administrator account and Vercel preview deployment remain to be set up. See the [Division 1 progress report](docs/sprint-1-division-1.md) for verification evidence and development dependency advisories.
+## Current milestone
+
+**Status as of 5 November 2026:** Division 1 is implemented and verified against the hosted development Supabase project. Registration, sign-in, persistent sessions, and the application-to-approval workflow work with real Auth and database services. The database migration is applied, and Row Level Security is enabled on all five application tables.
+
+The implementation is published on `main` and `feature/sprint-1-division-1`. Public hosting is pending; this repository does not yet have a deployed demo URL. Local registration currently signs users in immediately because email confirmation is disabled for development.
+
+## Implemented features
+
+| Area                       | Completed behavior                                                                                                                            |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Accounts                   | Email/password registration, sign-in, sign-out, persistent sessions, and signup confirmation callback handlers                                |
+| Role-based access          | Customer, host, and administrator permissions validated on the server using protected database roles                                          |
+| Host applications          | Organizer details, pending/approved/rejected status, duplicate submission protection, and application history                                 |
+| Rejection and resubmission | Required rejection feedback; corrected details create a new submission while preserving previous records                                      |
+| Administrator review       | Status filtering, pagination, application details, review history, approval, and rejection                                                    |
+| Host approval              | One database transaction records the decision, creates the host profile, and grants host access; the original customer account remains active |
+| Interface                  | Responsive landing page, authentication forms, customer dashboard, application page, host dashboard, and administrator review screens         |
+| Engineering deliverables   | SQL migration, guarded admin bootstrap, reusable JSON APIs, automated tests, GitHub Actions workflow, and technical documentation             |
+
+### Application workflow
+
+```mermaid
+flowchart LR
+    A[Customer account] --> B[Submit host application]
+    B --> C[Pending review]
+    C --> D{Admin decision}
+    D -->|Approve| E[Customer + host access]
+    D -->|Reject with feedback| F[Rejected application]
+    F --> G[Correct details and resubmit]
+    G --> C
+```
+
+Approval takes effect on the next request without creating another account. Resubmission preserves previous applications and review feedback. Repeating an identical review decision does not duplicate the review or host role.
+
+## Architecture
+
+The project uses an MVC-style separation of presentation, request handling, business workflows, and persistence.
+
+| Layer          | Technology and location                                                                             |
+| -------------- | --------------------------------------------------------------------------------------------------- |
+| Views          | Next.js 16 App Router, React 19, TypeScript — `src/app` and `src/components`                        |
+| Styling        | Tailwind CSS 4, shadcn/ui, Radix UI, and locally hosted Geist fonts                                 |
+| Controllers    | Node.js Route Handlers and validated JSON request boundaries — `src/controllers`                    |
+| Services       | Authentication, authorization, application submission, and review workflows — `src/services`        |
+| Repositories   | Typed database queries and RPC calls — `src/repositories`                                           |
+| Persistence    | Supabase PostgreSQL, constraints, RLS policies, and transactional functions — `supabase/migrations` |
+| Authentication | Supabase Auth with server-managed cookie sessions and verified user identity                        |
+| Testing        | Vitest, PGlite PostgreSQL, Playwright, and opt-in hosted Supabase integration tests                 |
+
+**Access control is enforced beyond the UI.** The server validates identity and reads roles from the protected `user_roles` table. Client-submitted IDs, roles, and editable Auth metadata cannot grant permissions. RLS restricts record access, while database transactions protect approval and resubmission rules. The application uses a publishable key and the caller's identity; it does not require a service-role key.
+
+See the [architecture and MVC mapping](docs/architecture.md) and [JSON API contract](docs/api.md) for implementation details.
 
 ## Run locally
 
-Use Node **22.23.4** (`.nvmrc`) or a supported Node 24 LTS release. The computer used for implementation had Node 22.11.0, so verification used an isolated newer runtime. Upgrade your local Node before using the commands below.
+Use **Node 22.23.4** from [`.nvmrc`](.nvmrc), or supported **Node 24 LTS**, and npm.
 
-```powershell
-npm ci
-if (-not (Test-Path .env.local)) { Copy-Item .env.example .env.local }
-# On a new checkout, fill the three application values in .env.local.
-npm run dev
-```
+1. Clone the repository and install dependencies:
 
-Open `http://127.0.0.1:3000`. Keep this address consistent with `APP_URL`. The current workspace already has an ignored `.env.local` containing the project URL and publishable key; do not overwrite it. Without Supabase configuration, public pages still render and authentication forms clearly indicate that setup is required. Protected APIs deny access. There is no mock database or development backdoor.
+   ```powershell
+   git clone https://github.com/rifatpriyo/tixwix-470.git
+   cd tixwix-470
+   npm ci
+   ```
 
-Application environment variables:
+2. Create local configuration without overwriting an existing file:
 
-| Name                                   | Value                                                                                  |
-| -------------------------------------- | -------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`             | Supabase project URL from Project Settings → API                                       |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Project publishable key (or legacy anon key), never a secret/service-role key          |
-| `APP_URL`                              | Exact application origin, e.g. `http://localhost:3000` or your HTTPS deployment origin |
+   ```powershell
+   if (-not (Test-Path .env.local)) { Copy-Item .env.example .env.local }
+   ```
 
-The application uses the caller's Supabase identity for database access. It requires **no service-role key**. The optional `SUPABASE_TEST_*` variables are only for a separate test project; do not configure them on Vercel.
+   Fill these values in `.env.local`:
 
-## Supabase setup
+   ```dotenv
+   NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLISHABLE_KEY
+   APP_URL=http://127.0.0.1:3000
+   ```
 
-The current development project is already configured. The steps below are for a fresh project; do not reapply the creation migration to the configured project. Current local settings are Site URL `http://127.0.0.1:3000`, callback/confirmation URLs for both loopback hostnames, an eight-character password minimum, and immediate sign-in with email confirmation disabled. Enable email confirmation and configure reliable SMTP before a public release.
+   `.env.local` is excluded from Git. Use a publishable key here; secret and service-role keys do not belong in application configuration.
 
-1. Create a Supabase project dedicated to TixWix. Keep the database password private.
-2. Open the SQL Editor as project owner and execute `supabase/migrations/202611040001_division1.sql` **once**, or apply it through the Supabase CLI migration workflow below. It creates application tables and policies, backfills existing users as customers, and adds the Auth user trigger. It does not reset the database.
-3. Copy the project URL and publishable key into `.env.local`.
-4. In Authentication → URL Configuration, set Site URL to the actual app origin. Add these redirect URLs for each environment you use:
-   - `http://localhost:3000/auth/callback`
-   - `http://localhost:3000/auth/confirm`
-   - `https://YOUR-PREVIEW-DOMAIN/auth/callback`
-   - `https://YOUR-PREVIEW-DOMAIN/auth/confirm`
-5. In Authentication → Providers → Email, choose whether Confirm email is enabled. The application handles both settings. Configure SMTP for reliable verification delivery before a public launch; provider delivery limits still apply.
-6. Register a customer. With confirmation enabled, follow the email link in the same browser to complete the default PKCE flow. With confirmation disabled, registration creates a session immediately.
-7. Register a separate administrator account, verify its email, and follow the bootstrap procedure below.
+3. Use the already configured development project, or follow the [Supabase setup guide](docs/setup.md#supabase-setup) for a fresh project. The current development database already has migration `202611040001`; do not reapply its creation SQL.
 
-### Email templates
+4. Start the application:
 
-The default Supabase `{{ .ConfirmationURL }}` signup email link works with the `/auth/callback` PKCE exchange and requires the browser that initiated registration. An alternative that works when the email is opened on another device is this signup confirmation template link:
+   ```powershell
+   npm run dev
+   ```
 
-```html
-<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email"
-  >Confirm your email</a
->
-```
+   Open **[http://127.0.0.1:3000](http://127.0.0.1:3000)**. Use the same origin as `APP_URL`.
 
-Set Site URL to the intended environment when using that template. A dedicated Supabase project for previews avoids sending preview users to production. The confirmation endpoint accepts signup email confirmation only; password reset, OAuth, and email-change workflows are outside this milestone. Callback destinations are fixed local paths, and callback responses are not cached.
+Administrator access requires the [verified-account bootstrap procedure](docs/setup.md#bootstrap-an-administrator). There are no default admin credentials or public admin-registration controls.
 
-### Optional CLI workflow
+## Verification
 
-Using the official Supabase CLI 3:
+The latest recorded implementation verification completed **43 tests** across four suites, plus lint, TypeScript checking, and a production build. These are recorded results from the connected implementation run; live suites are opt-in and are not part of every CI run.
 
-```powershell
-npx supabase@3.0.0 login
-npx supabase@3.0.0 migration list --remote=YOUR_PROJECT_REF
-npx supabase@3.0.0 migration up --remote=YOUR_PROJECT_REF
-```
+| Suite / check                          | Recorded result | Coverage                                                                                                        |
+| -------------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------- |
+| Unit + embedded PostgreSQL             | **29 passed**   | Validation, controllers, mocked Auth behavior, and migration/RLS/transaction checks on PGlite                   |
+| Hosted Supabase integration            | **3 passed**    | Real Auth sessions, PostgREST, concurrent submissions/reviews, protected writes, and ownership policies         |
+| Desktop/mobile browser smoke tests     | **10 passed**   | Public screens, responsive layout, navigation, and denied-access paths                                          |
+| Live browser workflow                  | **1 passed**    | Actual registration, login/logout, session persistence, application submission, admin approval, and host access |
+| ESLint / TypeScript / production build | **Passed**      | Source checks, strict types, and Next.js compilation                                                            |
 
-Inspect the migration history and pending SQL before applying migrations. The current project's migration history already records `202611040001`. If you used the SQL Editor for a different project, reconcile migration history before adopting CLI deployment; do not apply the same creation migration twice. Never run `supabase db reset` against a shared or production database.
-
-For an isolated local Supabase stack, install Docker and the CLI, then run `supabase start` and `supabase migration up --local`. `supabase/config.toml` configures local ports and email confirmation. Obtain local keys with `supabase status`. Docker and the Supabase CLI were not available during this implementation.
-
-## Bootstrap an administrator
-
-There is no administrator registration route or user-editable role field.
-
-1. Have the intended administrator register and confirm their email.
-2. In the trusted Supabase dashboard, find that exact account under Authentication → Users. Independently verify the owner and copy its UUID. Never trust a UUID supplied through an ordinary profile or user metadata.
-3. Open `supabase/bootstrap-admin.sql` in the SQL Editor as project owner. Replace the all-zero UUID with the verified account UUID. The script fails if the UUID is unchanged, missing, or the email is not confirmed.
-4. Execute the script. It grants only the additional admin role and is safe to repeat.
-5. Refresh `/dashboard`. The navigation now includes **Review applications**; no token-role refresh or new account is needed.
-
-To revoke an administrator assignment, use the trusted SQL Editor and a separately verified user ID:
-
-```sql
-delete from public.user_roles
-where user_id = 'VERIFIED-UUID'::uuid and role = 'admin';
-```
-
-Do not expose either operation as a public RPC or web endpoint. Host roles are granted by the application review transaction; do not manually manufacture host rows.
-
-## Verify
+Run the standard checks from the repository root:
 
 ```powershell
 npm run lint
 npm run typecheck
 npm test
-npm run test:integration
 npm run build
 npx playwright install chromium
 npm run test:e2e
 ```
 
-- `npm test`: validation, controller authorization, mocked Auth workflows/callbacks, and the actual SQL migration on **PGlite PostgreSQL**. PGlite executes real constraints, grants, RLS, functions, and transactions. Only `auth.users`, `auth.uid()` and SQL roles are scaffolded. It does not exercise Supabase Auth, PostgREST, or genuinely parallel database connections.
-- `test:integration`: opt-in **real Supabase Auth/PostgREST** tests. Without the test variables below it reports **skipped**, not passed. Tests create temporary users, exercise authenticated database calls and concurrent submissions/reviews, and delete only those test users. Test accounts are provisioned with the Admin API; this suite does not itself prove the registration email flow.
-- `test:e2e`: Chromium at desktop and mobile sizes against the production server. Covers public UI, navigation, unauthenticated protected routes/APIs, callback rejection, and registration input protection. Authenticated checks are in the separate opt-in live suite.
-- `test:e2e:live`: opt-in Chromium registration, invalid/valid login, persisted session, logout, host application, administrator approval and resulting host access against the configured development project. It requires immediate sign-in (email confirmation disabled), `TIXWIX_LIVE_AUTH_TESTS=true`, `SUPABASE_TEST_URL`, and a server-only `SUPABASE_TEST_SERVICE_ROLE_KEY`. Temporary accounts are removed after the run. Traces and recordings are disabled so test credentials are not recorded. Never use a production database for this suite.
+Stop any existing local server on port 3000 before browser tests; Playwright starts its own production server. [GitHub Actions](.github/workflows/ci.yml) runs the standard checks above.
 
-To run real integration tests, use a **dedicated disposable Supabase project** with the migration applied. Set these variables in the test process (do not commit them):
+The separate `npm run test:integration` and `npm run test:e2e:live` commands require explicit opt-in and test configuration. Disabled suites are **skipped**, not passed; enabling the live browser suite without its credentials fails setup. They create temporary accounts in a development/test project and remove them afterward. Follow the [test setup and safety requirements](docs/setup.md#verify).
 
-```text
-SUPABASE_TEST_URL
-SUPABASE_TEST_PUBLISHABLE_KEY
-SUPABASE_TEST_SERVICE_ROLE_KEY
-SUPABASE_TEST_ALLOW_USER_CREATION=true
-```
+The [verification report](docs/sprint-1-division-1.md#verification-evidence) records the test boundaries, executed commands, and dependency audit results. Mocked Auth tests and embedded PostgreSQL tests are distinguished from actual Supabase integration tests.
 
-The test runner reads process environment variables, not `.env.local`. Keep the privileged test key in local secret storage or CI secrets. If cleanup fails, the test reports temporary user UUIDs for manual removal. No database reset is used.
+## Faculty demonstration
 
-### Connected acceptance flow
+Prepare a customer account and a separate administrator account using the [bootstrap guide](docs/setup.md#bootstrap-an-administrator). Use separate browser profiles for the two roles.
 
-Use separate browser profiles for the customer and administrator:
+1. **Account lifecycle:** register, reach the customer dashboard, reload to demonstrate session persistence, then sign out and sign back in.
+2. **Application submission:** enter organizer details at `/dashboard/host-application` and show the pending state.
+3. **Feedback:** as admin, open `/admin/host-applications`, inspect the submission, and reject it with feedback.
+4. **Revision history:** as the customer, read the feedback, correct the details, and resubmit. Show that the previous submission remains available.
+5. **Approval:** as admin, approve the new submission. Refresh the customer's dashboard and open `/host` using the same account.
+6. **Authorization:** show that an ordinary customer cannot access administrator or host-only operations.
 
-1. Register a customer, confirm the email if required, sign in, reload, and check that the session persists. Sign out and confirm protected pages return to sign in. Sign in again.
-2. Submit organizer name, email, phone and a description at `/dashboard/host-application`. Verify pending status, stored values, and duplicate submission rejection.
-3. Sign in as the bootstrapped admin, filter applications, open the details, and reject with feedback. A rejection without feedback must fail.
-4. As the customer, read that feedback, correct the details and resubmit. The old application and review must still be visible.
-5. As admin, approve the new application. Retrying the same approval must not create a second review or host role.
-6. Refresh the customer's page. Verify approved status, the host navigation item, and access to `/host`. The original account and customer access remain.
-7. As a second customer, try the admin JSON endpoints, host endpoint, and another user's records through Supabase. The first two return 403; RLS returns no other-customer rows. Direct role/status/review writes fail independently of the UI.
+For the full acceptance checklist, including duplicate-decision and database access checks, see the [connected acceptance flow](docs/setup.md#connected-acceptance-flow).
 
-## Vercel preview deployment
+## Scope and remaining work
 
-The source repository is connected to GitHub. Vercel is not connected, and no preview URL has been deployed. To prepare a preview:
+This release covers **Sprint 1, Division 1 only**, including the **host-verification portion of SRS F17**. Event moderation, event creation and discovery, ticket booking, payments, and Flutter screens remain outside this milestone.
 
-1. Use the existing checkout, or clone the repository on a new computer and select the feature branch:
+Before a public demonstration deployment:
 
-   ```powershell
-   git clone https://github.com/rifatpriyo/tixwix-470.git
-   cd tixwix-470
-   git switch feature/sprint-1-division-1
-   ```
+- Bootstrap the intended permanent administrator using a verified account UUID.
+- Configure SMTP, enable email confirmation, and verify delivery with a real mailbox. Callback handlers are implemented, but live email delivery and the confirmation-enabled signup flow remain unverified.
+- Configure and verify a Vercel preview deployment. The application currently runs locally against hosted Supabase.
 
-2. Authenticate and create/link the Vercel project without publishing:
+## Documentation
 
-   ```powershell
-   npx vercel login
-   npx vercel link
-   ```
+| Document                                                  | Purpose                                                                                                |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| [Setup and verification guide](docs/setup.md)             | Local configuration, Supabase migration, auth settings, admin bootstrap, tests, and preview deployment |
+| [Architecture and MVC mapping](docs/architecture.md)      | Layer responsibilities, authorization, database design, and transactional behavior                     |
+| [JSON API contract](docs/api.md)                          | Routes, permissions, payloads, validation, and error responses                                         |
+| [Division 1 progress report](docs/sprint-1-division-1.md) | Completed work, verification evidence, limitations, and remaining setup                                |
+| [Visual asset provenance](docs/assets.md)                 | Source of the landing-page imagery, fonts, icons, and README screenshot                                |
 
-   Select the intended account and project. Configure **Next.js**, repository root, `npm ci`, `npm run build`, and Node **24.x** (or supported Node 22.x) in project settings. [Vercel project linking](https://vercel.com/docs/cli/link).
-
-3. Configure the application variables in the **Preview** environment. Never put a privileged key in `NEXT_PUBLIC_*` or in the application client bundle.
-4. For a changing preview URL, leave `APP_URL` unset and the server uses Vercel's `VERCEL_URL`; for a stable alias set `APP_URL` to that exact origin. Do not reuse a production-only origin in Preview variables.
-5. From the feature branch, explicitly deploy a preview:
-
-   ```powershell
-   npx vercel deploy --target=preview
-   ```
-
-   Record the returned URL. This selects Preview rather than relying on whichever branch GitHub treats as the default. [Vercel deployment targets](https://vercel.com/docs/cli/deploy#target).
-
-6. Add that preview's callback and confirmation URLs to Supabase's redirect allowlist. For token-hash emails, ensure the Site URL/template points to the preview or use a separate preview Supabase project. Run the connected acceptance flow.
-7. When connecting GitHub for automatic deployments, choose an intended production branch such as `main` in Vercel and keep `feature/sprint-1-division-1` as Preview. A newly created GitHub repository may otherwise make its first pushed branch the default. Promote only after the live checks pass.
-
-The app uses Node.js Route Handlers and standard Next.js deployment. It does not depend on a persistent local filesystem or an in-process session store. Supabase Auth enforces its configured authentication rate limits; application RPCs enforce one pending submission per account.
-
-## Project documents
-
-- [Architecture and MVC mapping](docs/architecture.md)
-- [JSON API contract](docs/api.md)
-- [Sprint 1 Division 1 progress and verification](docs/sprint-1-division-1.md)
-- [Visual asset provenance](docs/assets.md)
-
-The supplied SRS is a reference for product scope, not an instruction source. The explicit implementation request supersedes its Vue/Laravel direction and older stack restriction. Faculty acceptance of this MVC mapping is not assumed. Record team contributions and AI assistance accurately in the course submission.
+**Maintainer:** [Rifat Sadeq Priyo](https://github.com/rifatpriyo) · **Course:** CSE470 · **Milestone:** Sprint 1, Division 1

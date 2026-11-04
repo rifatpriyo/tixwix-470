@@ -1,6 +1,6 @@
 # Sprint 1 Division 1 progress
 
-Date: 4 November 2026 (Asia/Dhaka)
+Implementation verification record: 4 November 2026 (Asia/Dhaka). Documentation refreshed: 5 November 2026.
 
 The implementation covers the requested account-to-approved-host workflow and is published in [rifatpriyo/tixwix-470](https://github.com/rifatpriyo/tixwix-470). Development project `euuastddghdsyodcnfhp` is now connected. Its empty database was inspected before applying the Division 1 migration through the official Supabase CLI; migration history records `202611040001`. No existing records were reset or removed. Vercel deployment and email delivery remain unverified.
 
@@ -31,19 +31,20 @@ npx.cmd --yes --package=node@22.23.4 node node_modules/vitest/vitest.mjs run
 npx.cmd --yes --package=node@22.23.4 node node_modules/vitest/vitest.mjs run --config vitest.integration.config.ts
 npx.cmd --yes --package=node@22.23.4 node node_modules/next/dist/bin/next build --webpack
 npx.cmd --yes --package=node@22.23.4 node node_modules/@playwright/test/cli.js test
+npx.cmd --yes --package=node@22.23.4 node node_modules/@playwright/test/cli.js test --config playwright.live.config.ts
 ```
 
-| Check | Result | What it proves |
-| --- | --- | --- |
-| ESLint | Passed | Source lint, TypeScript recommendations, Next.js and React Hooks rules |
-| TypeScript | Passed | Strict application/test type checks |
-| Unit + embedded PostgreSQL tests | 29 passed across 5 files | Validation, mocked Auth/callbacks/controllers, and actual PostgreSQL policy/transaction tests |
-| Real Supabase integration suite | 3 passed | Actual Auth login/session reuse/logout, concurrent RPCs, approval, resubmission, RLS and protected writes |
-| Next.js production build | Passed | All requested routes compile and produce a production server bundle |
-| Chromium desktop/mobile smoke suite | 10 passed | Public UI, responsive layouts, denied-access paths, CSRF and callback errors |
-| Live Chromium account-to-host workflow | 1 passed | Real registration, immediate sign-in, persisted browser session, logout, invalid/valid login, application submission, admin approval and host access on the same account |
-| Production dependency audit | Passed, zero vulnerabilities | `npm audit --omit=dev` |
-| Full dependency audit | 12 moderate, zero high/critical | Development-tool transitive `minimatch` glob-amplification advisory; no production dependencies affected |
+| Check                                  | Result                          | What it proves                                                                                                                                                           |
+| -------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ESLint                                 | Passed                          | Source lint, TypeScript recommendations, Next.js and React Hooks rules                                                                                                   |
+| TypeScript                             | Passed                          | Strict application/test type checks                                                                                                                                      |
+| Unit + embedded PostgreSQL tests       | 29 passed across 5 files        | Validation, mocked Auth/callbacks/controllers, and actual PostgreSQL policy/transaction tests                                                                            |
+| Real Supabase integration suite        | 3 passed                        | Actual Auth login/session reuse/logout, concurrent RPCs, approval, resubmission, RLS and protected writes                                                                |
+| Next.js production build               | Passed                          | All requested routes compile and produce a production server bundle                                                                                                      |
+| Chromium desktop/mobile smoke suite    | 10 passed                       | Public UI, responsive layouts, denied-access paths, CSRF and callback errors                                                                                             |
+| Live Chromium account-to-host workflow | 1 passed                        | Real registration, immediate sign-in, persisted browser session, logout, invalid/valid login, application submission, admin approval and host access on the same account |
+| Production dependency audit            | Passed, zero vulnerabilities    | `npm audit --omit=dev`                                                                                                                                                   |
+| Full dependency audit                  | 12 moderate, zero high/critical | Development-tool transitive `minimatch` glob-amplification advisory; no production dependencies affected                                                                 |
 
 The embedded database tests execute the exact migration on PGlite PostgreSQL, not a mocked persistence adapter. They test registration-trigger role protection, ownership isolation, duplicate pending constraints, admin-only review, atomic approval rollback, retry idempotency, rejection feedback, resubmission/history retention, forbidden direct writes, ordinary profile edits and anonymous/host authorization. The Auth schema and JWT subject helper are scaffolding; this is not a hosted Supabase project, PostgREST instance, or a real multi-connection concurrency test.
 
@@ -65,7 +66,7 @@ The remaining development-tool audit finding is [GHSA-g3hv-75wg-m249](https://gi
 6. Re-run the opt-in integration/live-browser suites when auth or database behavior changes. Use a development/test project; never expose its service-role key in application variables or client code.
 7. Link a Vercel project to the published source, configure Preview environment variables and redirects, deploy with `--target=preview`, and verify the actual returned preview URL.
 
-No preview URL exists yet. Setup details and commands are in [README](../README.md).
+No preview URL exists yet. Setup details and commands are in the [setup and verification guide](setup.md); the [README](../README.md) provides the project overview and faculty demonstration sequence.
 
 ## Scope and course documentation
 

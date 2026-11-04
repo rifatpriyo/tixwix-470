@@ -18,7 +18,7 @@ For browser mutations send `Content-Type: application/json` and same-origin requ
 | GET    | `/api/host`                                          | Approved host          | `{host}` with the caller's approved organizer information                                              |
 | GET    | `/api/admin/host-applications?status=pending&page=1` | Administrator          | `{applications,total,page,pageSize}`; status: pending, approved, rejected or all; 20 rows/page         |
 | GET    | `/api/admin/host-applications/:id`                   | Administrator          | Selected `{application,applications,reviews}` including the applicant's previous submissions           |
-| POST   | `/api/admin/host-applications/:id/review`            | Administrator          | `{decision:"approved"                                                                                  | "rejected",feedback?:string}`→`{application}` |
+| POST   | `/api/admin/host-applications/:id/review`            | Administrator          | `{decision:"approved"\|"rejected",feedback?:string}` → `{application}`                                 |
 
 Application fields are trimmed on the server. Organizer name is 2–120 characters, contact email at most 254 characters, phone 7–15 digits with optional leading plus/spaces/parentheses/hyphens (maximum 25 characters), and description 30–2,000 characters. Rejection requires nonblank feedback of at most 2,000 characters. Passwords have a local minimum of 8 characters and maximum of 128; stricter Supabase settings are also honored. Unknown fields are rejected.
 
