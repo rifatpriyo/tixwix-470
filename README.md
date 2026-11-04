@@ -16,9 +16,9 @@ Repository: [rifatpriyo/tixwix-470](https://github.com/rifatpriyo/tixwix-470). T
 - Created the landing page, authentication screens, customer dashboard, application page, host dashboard, and admin review pages with responsive layouts.
 - Added SQL migrations, a guarded administrator bootstrap procedure, reusable JSON APIs, a CI workflow, and setup/architecture/deployment documentation.
 
-**Verified locally:** lint, TypeScript, production build, 29 unit/database tests, and 10 desktop/mobile browser tests passed. The production dependency audit reported zero vulnerabilities.
+**Verified:** lint, TypeScript, production build, 29 unit/database tests, 10 desktop/mobile browser tests, three real Supabase integration tests, and the live browser registration-to-approved-host workflow all passed. The production dependency audit reported zero vulnerabilities.
 
-**Still awaiting live setup:** Supabase project credentials, migration application, email delivery, administrator bootstrap, and Vercel preview deployment. Three real Supabase integration tests were skipped because test credentials were unavailable. Authentication-provider unit tests use mocks; database policy tests use embedded PostgreSQL. The full registration-to-host flow has not yet been verified against a live Supabase project. See the [Division 1 progress report](docs/sprint-1-division-1.md) for test evidence and development dependency advisories.
+**Live Supabase setup:** project `euuastddghdsyodcnfhp` is connected locally, the Division 1 migration is applied and recorded, and all three real Supabase integration tests passed. Email confirmation is disabled at the owner's request for local testing, so new accounts receive a session immediately. Authentication-provider unit tests still use mocks; the separate integration suite uses the actual hosted database and Auth service. A permanent administrator account and Vercel preview deployment remain to be set up. See the [Division 1 progress report](docs/sprint-1-division-1.md) for verification evidence and development dependency advisories.
 
 ## Run locally
 
@@ -26,12 +26,12 @@ Use Node **22.23.4** (`.nvmrc`) or a supported Node 24 LTS release. The computer
 
 ```powershell
 npm ci
-Copy-Item .env.example .env.local
-# Fill the three application values in .env.local.
+if (-not (Test-Path .env.local)) { Copy-Item .env.example .env.local }
+# On a new checkout, fill the three application values in .env.local.
 npm run dev
 ```
 
-Open `http://localhost:3000`. Without Supabase configuration, public pages still render and authentication forms clearly indicate that setup is required. Protected APIs deny access. There is no mock database or development backdoor.
+Open `http://127.0.0.1:3000`. Keep this address consistent with `APP_URL`. The current workspace already has an ignored `.env.local` containing the project URL and publishable key; do not overwrite it. Without Supabase configuration, public pages still render and authentication forms clearly indicate that setup is required. Protected APIs deny access. There is no mock database or development backdoor.
 
 Application environment variables:
 
@@ -44,6 +44,8 @@ Application environment variables:
 The application uses the caller's Supabase identity for database access. It requires **no service-role key**. The optional `SUPABASE_TEST_*` variables are only for a separate test project; do not configure them on Vercel.
 
 ## Supabase setup
+
+The current development project is already configured. The steps below are for a fresh project; do not reapply the creation migration to the configured project. Current local settings are Site URL `http://127.0.0.1:3000`, callback/confirmation URLs for both loopback hostnames, an eight-character password minimum, and immediate sign-in with email confirmation disabled. Enable email confirmation and configure reliable SMTP before a public release.
 
 1. Create a Supabase project dedicated to TixWix. Keep the database password private.
 2. Open the SQL Editor as project owner and execute `supabase/migrations/202611040001_division1.sql` **once**, or apply it through the Supabase CLI migration workflow below. It creates application tables and policies, backfills existing users as customers, and adds the Auth user trigger. It does not reset the database.
@@ -71,16 +73,15 @@ Set Site URL to the intended environment when using that template. A dedicated S
 
 ### Optional CLI workflow
 
-With the official Supabase CLI installed and authenticated:
+Using the official Supabase CLI 3:
 
 ```powershell
-supabase login
-supabase link --project-ref YOUR_PROJECT_REF
-supabase db push --dry-run
-supabase db push
+npx supabase@3.0.0 login
+npx supabase@3.0.0 migration list --remote=YOUR_PROJECT_REF
+npx supabase@3.0.0 migration up --remote=YOUR_PROJECT_REF
 ```
 
-Inspect the dry-run before applying migrations. If you used the SQL Editor first, reconcile migration history before adopting CLI deployment; do not apply the same creation migration twice. Never run `supabase db reset` against a shared or production database.
+Inspect the migration history and pending SQL before applying migrations. The current project's migration history already records `202611040001`. If you used the SQL Editor for a different project, reconcile migration history before adopting CLI deployment; do not apply the same creation migration twice. Never run `supabase db reset` against a shared or production database.
 
 For an isolated local Supabase stack, install Docker and the CLI, then run `supabase start` and `supabase migration up --local`. `supabase/config.toml` configures local ports and email confirmation. Obtain local keys with `supabase status`. Docker and the Supabase CLI were not available during this implementation.
 
@@ -117,7 +118,8 @@ npm run test:e2e
 
 - `npm test`: validation, controller authorization, mocked Auth workflows/callbacks, and the actual SQL migration on **PGlite PostgreSQL**. PGlite executes real constraints, grants, RLS, functions, and transactions. Only `auth.users`, `auth.uid()` and SQL roles are scaffolded. It does not exercise Supabase Auth, PostgREST, or genuinely parallel database connections.
 - `test:integration`: opt-in **real Supabase Auth/PostgREST** tests. Without the test variables below it reports **skipped**, not passed. Tests create temporary users, exercise authenticated database calls and concurrent submissions/reviews, and delete only those test users. Test accounts are provisioned with the Admin API; this suite does not itself prove the registration email flow.
-- `test:e2e`: Chromium at desktop and mobile sizes against the production server. Covers public UI, navigation, unauthenticated protected routes/APIs, callback rejection, and registration input protection. Authenticated end-to-end checks require a connected project and the manual acceptance flow below.
+- `test:e2e`: Chromium at desktop and mobile sizes against the production server. Covers public UI, navigation, unauthenticated protected routes/APIs, callback rejection, and registration input protection. Authenticated checks are in the separate opt-in live suite.
+- `test:e2e:live`: opt-in Chromium registration, invalid/valid login, persisted session, logout, host application, administrator approval and resulting host access against the configured development project. It requires immediate sign-in (email confirmation disabled), `TIXWIX_LIVE_AUTH_TESTS=true`, `SUPABASE_TEST_URL`, and a server-only `SUPABASE_TEST_SERVICE_ROLE_KEY`. Temporary accounts are removed after the run. Traces and recordings are disabled so test credentials are not recorded. Never use a production database for this suite.
 
 To run real integration tests, use a **dedicated disposable Supabase project** with the migration applied. Set these variables in the test process (do not commit them):
 
