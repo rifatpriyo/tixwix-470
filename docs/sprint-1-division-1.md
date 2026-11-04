@@ -2,7 +2,7 @@
 
 Date: 4 November 2026 (Asia/Dhaka)
 
-The local implementation covers the requested account-to-approved-host workflow. Live Supabase authentication, email delivery, and a hosted preview remain unverified because this workspace has no Supabase project configuration, GitHub remote, or Vercel connection. No production database was reset or changed.
+The implementation covers the requested account-to-approved-host workflow and is published in [rifatpriyo/tixwix-470](https://github.com/rifatpriyo/tixwix-470). Live Supabase authentication, email delivery, and a hosted preview remain unverified because this workspace has no Supabase project configuration or Vercel connection. No production database was reset or changed.
 
 ## Implemented
 
@@ -16,7 +16,7 @@ The local implementation covers the requested account-to-approved-host workflow.
 - All seven requested page routes, plus an administrator details route. Responsive layout, keyboard focus states, labeled forms, loading/empty/error/success states and duplicate-submit protection.
 - Reusable JSON business APIs supporting Supabase bearer access tokens for a future Flutter client. No Flutter code in this milestone.
 - Safe environment template, verified-UUID administrator bootstrap, setup/redirect/deployment documentation, architecture mapping, API contract, and a GitHub Actions check workflow.
-- Local Git feature branch `feature/sprint-1-division-1`. No remote push or deployment has occurred.
+- GitHub source on `main` and `feature/sprint-1-division-1`. Commits use Rifat Sadeq Priyo's configured Git author and committer identity, with no Codex co-author trailers or contribution badges. No hosted deployment has occurred.
 
 ## Verification evidence
 
@@ -58,7 +58,7 @@ The remaining development-tool audit finding is [GHSA-g3hv-75wg-m249](https://gi
 4. Configure Supabase Site URL, callback allowlist, email-confirmation setting and email delivery. Verify the complete customer registration/login/reload/logout flow with a real mailbox.
 5. Register and confirm the intended administrator, verify its Auth UUID, and execute the guarded bootstrap script as project owner.
 6. Run the connected acceptance flow and the optional real integration suite against a dedicated test project. Never expose its service-role key in application variables or client code.
-7. Supply/create the GitHub repository remote and push the local feature branch. Link a Vercel project, configure Preview environment variables and redirects, deploy with `--target=preview`, and verify the actual returned preview URL.
+7. Link a Vercel project to the published source, configure Preview environment variables and redirects, deploy with `--target=preview`, and verify the actual returned preview URL.
 
 No preview URL exists yet. Setup details and commands are in [README](../README.md).
 

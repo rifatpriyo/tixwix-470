@@ -4,6 +4,22 @@
 
 This milestone implements accounts, protected roles, customer host applications, administrator reviews, and approved-host access. A customer keeps the same account after approval. Event creation, discovery, ticket booking, event moderation, and Flutter screens are deliberately outside this division. Only the host-verification portion of SRS feature F17 is implemented.
 
+Repository: [rifatpriyo/tixwix-470](https://github.com/rifatpriyo/tixwix-470). The completed milestone is available on `main` and `feature/sprint-1-division-1`.
+
+## Work completed so far
+
+- Set up Next.js App Router, TypeScript, React, Tailwind CSS, shadcn/ui, and the Supabase integration.
+- Implemented customer registration, login, logout, persistent sessions, and email-confirmation callbacks.
+- Added protected customer, host, and administrator roles, with server authorization and database Row Level Security.
+- Built the host application form, pending/approved/rejected statuses, rejection feedback, and corrected resubmission with preserved history.
+- Built administrator application filtering, detail views, review history, and approval/rejection decisions. Approval grants host access atomically while retaining customer access.
+- Created the landing page, authentication screens, customer dashboard, application page, host dashboard, and admin review pages with responsive layouts.
+- Added SQL migrations, a guarded administrator bootstrap procedure, reusable JSON APIs, a CI workflow, and setup/architecture/deployment documentation.
+
+**Verified locally:** lint, TypeScript, production build, 29 unit/database tests, and 10 desktop/mobile browser tests passed. The production dependency audit reported zero vulnerabilities.
+
+**Still awaiting live setup:** Supabase project credentials, migration application, email delivery, administrator bootstrap, and Vercel preview deployment. Three real Supabase integration tests were skipped because test credentials were unavailable. Authentication-provider unit tests use mocks; database policy tests use embedded PostgreSQL. The full registration-to-host flow has not yet been verified against a live Supabase project. See the [Division 1 progress report](docs/sprint-1-division-1.md) for test evidence and development dependency advisories.
+
 ## Run locally
 
 Use Node **22.23.4** (`.nvmrc`) or a supported Node 24 LTS release. The computer used for implementation had Node 22.11.0, so verification used an isolated newer runtime. Upgrade your local Node before using the commands below.
@@ -128,13 +144,14 @@ Use separate browser profiles for the customer and administrator:
 
 ## Vercel preview deployment
 
-No GitHub repository URL or Vercel connection was present in the empty workspace. No preview URL has been deployed. After connecting your accounts:
+The source repository is connected to GitHub. Vercel is not connected, and no preview URL has been deployed. To prepare a preview:
 
-1. Create an empty GitHub repository and attach its remote to this local feature branch:
+1. Use the existing checkout, or clone the repository on a new computer and select the feature branch:
 
    ```powershell
-   git remote add origin https://github.com/YOUR-OWNER/YOUR-REPO.git
-   git push -u origin feature/sprint-1-division-1
+   git clone https://github.com/rifatpriyo/tixwix-470.git
+   cd tixwix-470
+   git switch feature/sprint-1-division-1
    ```
 
 2. Authenticate and create/link the Vercel project without publishing:
