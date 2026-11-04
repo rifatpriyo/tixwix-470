@@ -1,5 +1,7 @@
 # Sprint 1 Division 1 progress
 
+**Project version: 0.1** (`0.1.0` in package metadata).
+
 Implementation verification record: 4 November 2026 (Asia/Dhaka). Documentation refreshed: 5 November 2026.
 
 The implementation covers the requested account-to-approved-host workflow and is published in [rifatpriyo/tixwix-470](https://github.com/rifatpriyo/tixwix-470). Development project `euuastddghdsyodcnfhp` is now connected. Its empty database was inspected before applying the Division 1 migration through the official Supabase CLI; migration history records `202611040001`. No existing records were reset or removed. Vercel deployment and email delivery remain unverified.
@@ -71,5 +73,7 @@ No preview URL exists yet. Setup details and commands are in the [setup and veri
 ## Scope and course documentation
 
 This milestone is **Sprint 1, Division 1**, not all of Sprint 1 and not all of F17. Event moderation, publishing, discovery, venues, scheduling, pricing, bookings and Flutter remain for later instructions. There are no fabricated sales counts, events or disabled controls pretending those workflows exist.
+
+The version 0.1 interface and README screenshot show the current development state, not the final visual design. Extensive work on the UI and user experience is planned for later iterations; the current milestone focuses on functional account and host-onboarding workflows.
 
 The supplied SRS was read as product reference; its old Vue/Laravel direction and stack restriction were superseded by the explicit request. The original Word file was not edited. MVC responsibilities are documented for faculty review without claiming approval. The team still needs to record its own contributions, demonstrate understanding, and accurately disclose AI assistance in the course submission.

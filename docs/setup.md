@@ -1,5 +1,7 @@
 # TixWix setup and verification
 
+**Applies to TixWix version 0.1** (`0.1.0` in package metadata).
+
 [Back to project overview](../README.md) | [Architecture](architecture.md) | [Verification report](sprint-1-division-1.md)
 
 Run commands from the repository root. This guide covers a fresh checkout, Supabase configuration, administrator setup, tests, and optional preview deployment.

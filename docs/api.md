@@ -1,5 +1,7 @@
 # Division 1 JSON API
 
+**Applies to TixWix version 0.1** (`0.1.0` in package metadata).
+
 All routes execute in the Node.js runtime. Private responses use `Cache-Control: private, no-store`. Requests and responses are JSON except for email callbacks, which redirect.
 
 For browser mutations send `Content-Type: application/json` and same-origin requests; cookies are managed by the server. The allowed origin is `APP_URL`, falling back to `https://VERCEL_URL` on Vercel. For a future native client, authenticate and refresh tokens with Supabase Auth, then send `Authorization: Bearer ACCESS_TOKEN` to the business APIs. Native clients must store tokens securely. Browser login/register routes return session cookies, not access/refresh token JSON.

@@ -1,4 +1,4 @@
-# TixWix
+# TixWix · v0.1
 
 **CSE470 Software Engineering Project · Sprint 1, Division 1**
 
@@ -8,11 +8,15 @@ An event platform being developed in stages. This milestone delivers the complet
 
 [Features](#implemented-features) · [Architecture](#architecture) · [Run locally](#run-locally) · [Verification](#verification) · [Demonstration](#faculty-demonstration) · [Documentation](#documentation)
 
-![TixWix landing page showing account registration and organizer onboarding](docs/images/homepage.png)
+![TixWix v0.1 preliminary landing page showing account registration and organizer onboarding](docs/images/homepage.png)
 
 _Actual application screenshot captured locally. The concert image is decorative; event listings and ticket booking belong to later milestones._
 
+> **Early UI preview:** This screenshot shows the current version 0.1 interface and does not represent TixWix's final look. Extensive work on the UI, visual design, and user experience is planned for later development stages.
+
 ## Current milestone
+
+**Current version: 0.1** (recorded as `0.1.0` in `package.json` and `package-lock.json`). This is the initial development version covering Sprint 1, Division 1.
 
 **Status as of 5 November 2026:** Division 1 is implemented and verified against the hosted development Supabase project. Registration, sign-in, persistent sessions, and the application-to-approval workflow work with real Auth and database services. The database migration is applied, and Row Level Security is enabled on all five application tables.
 
@@ -150,6 +154,8 @@ For the full acceptance checklist, including duplicate-decision and database acc
 ## Scope and remaining work
 
 This release covers **Sprint 1, Division 1 only**, including the **host-verification portion of SRS F17**. Event moderation, event creation and discovery, ticket booking, payments, and Flutter screens remain outside this milestone.
+
+Version 0.1 prioritizes working account and organizer-onboarding workflows. The interface is preliminary; extensive UI and user-experience improvements are planned for later iterations.
 
 Before a public demonstration deployment:
 

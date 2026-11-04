@@ -9,3 +9,5 @@ Prompt used:
 Geist fonts are self-hosted from `@fontsource/geist`; Radix icons supply interface icons. shadcn/ui source components were installed using its official CLI and customized through TixWix theme tokens. The generated `cn` imports were corrected to the local `src/lib/utils.ts` helper; the unneeded external `cn` dependency was removed.
 
 `docs/images/homepage.png` is an existing screenshot of the actual local application's public landing page, selected for the README during the 5 November 2026 documentation refresh. It contains no signed-in account information. The concert image within it is the decorative asset described above. This documentation image is separate from generated browser test reports, which remain excluded from Git.
+
+The screenshot represents the preliminary **version 0.1** interface. It does not represent the final look of TixWix. Extensive UI, visual design, and user-experience work is planned for later development stages.

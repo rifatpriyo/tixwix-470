@@ -1,5 +1,7 @@
 # Sprint 1 Division 1 architecture
 
+**Applies to TixWix version 0.1** (`0.1.0` in package metadata).
+
 TixWix uses Next.js App Router and React with TypeScript, Tailwind CSS 4, shadcn/ui components, and Supabase PostgreSQL/Auth. The architecture separates presentation, request handling, workflow rules, and storage. This is an explicit MVC-style organization, not a claim of faculty approval of the framework.
 
 | Responsibility      | Location                                          | What it owns                                                                                             |
