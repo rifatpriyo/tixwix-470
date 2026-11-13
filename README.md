@@ -1,127 +1,64 @@
-# TixWix · v0.1
+# TixWix
 
-**CSE470 Software Engineering Project · Sprint 1, Division 1**
+**CSE470 · Sprint 1, Divisions 1 and 2**
 
-An event platform being developed in stages. This milestone delivers the complete **customer account → host application → administrator review → approved-host access** workflow using a live Supabase backend.
+TixWix supports **approved host → event draft → correction → resubmission → administrator publication → public discovery**, building on Division 1 registration, roles, host verification and dashboards.
 
-[![Division 1 checks](https://github.com/rifatpriyo/tixwix-470/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rifatpriyo/tixwix-470/actions/workflows/ci.yml)
+Division 2 is implemented and its incremental migrations are applied to the confirmed development Supabase project `euuastddghdsyodcnfhp`. The application runs locally against that backend. Vercel preview deployment remains pending.
 
-[Features](#implemented-features) · [Architecture](#architecture) · [Run locally](#run-locally) · [Verification](#verification) · [Demonstration](#faculty-demonstration) · [Documentation](#documentation)
+## Features and scope
 
-![TixWix v0.1 preliminary landing page showing account registration and organizer onboarding](docs/images/homepage.png)
+- Host workspace with My Events, incomplete drafts, editing, private poster uploads and separate submission.
+- Event description/category, venue/address/city, Dhaka session times, BDT ticket price and capacity.
+- Admin review queue, required correction feedback, resubmission, approval/publication and review history.
+- Pending events are read-only. Saving published edits withdraws them atomically; stale/concurrent decisions return 409.
+- Public homepage catalogue, title/category/city/date filters, URL persistence, bounded pagination, starting prices and refreshable details.
+- Server identity checks, protected database roles, RLS, restricted grants, transactional writes and immutable private Storage objects.
+- JSON APIs shared by the website and a future Flutter client.
 
-_Actual application screenshot captured locally. The concert image is decorative; event listings and ticket booking belong to later milestones._
-
-> **Early UI preview:** This screenshot shows the current version 0.1 interface and does not represent TixWix's final look. Extensive work on the UI, visual design, and user experience is planned for later development stages.
-
-## Current milestone
-
-**Current version: 0.1** (recorded as `0.1.0` in `package.json` and `package-lock.json`). This is the initial development version covering Sprint 1, Division 1.
-
-**Status as of 5 November 2026:** Division 1 is implemented and verified against the hosted development Supabase project. Registration, sign-in, persistent sessions, and the application-to-approval workflow work with real Auth and database services. The database migration is applied, and Row Level Security is enabled on all five application tables.
-
-The implementation is published on `main` and `feature/sprint-1-division-1`. Public hosting is pending; this repository does not yet have a deployed demo URL. Local registration currently signs users in immediately because email confirmation is disabled for development.
-
-## Implemented features
-
-| Area                       | Completed behavior                                                                                                                            |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Accounts                   | Email/password registration, sign-in, sign-out, persistent sessions, and signup confirmation callback handlers                                |
-| Role-based access          | Customer, host, and administrator permissions validated on the server using protected database roles                                          |
-| Host applications          | Organizer details, pending/approved/rejected status, duplicate submission protection, and application history                                 |
-| Rejection and resubmission | Required rejection feedback; corrected details create a new submission while preserving previous records                                      |
-| Administrator review       | Status filtering, pagination, application details, review history, approval, and rejection                                                    |
-| Host approval              | One database transaction records the decision, creates the host profile, and grants host access; the original customer account remains active |
-| Interface                  | Responsive landing page, authentication forms, customer dashboard, application page, host dashboard, and administrator review screens         |
-| Engineering deliverables   | SQL migration, guarded admin bootstrap, reusable JSON APIs, automated tests, GitHub Actions workflow, and technical documentation             |
-
-### Application workflow
-
-```mermaid
-flowchart LR
-    A[Customer account] --> B[Submit host application]
-    B --> C[Pending review]
-    C --> D{Admin decision}
-    D -->|Approve| E[Customer + host access]
-    D -->|Reject with feedback| F[Rejected application]
-    F --> G[Correct details and resubmit]
-    G --> C
-```
-
-Approval takes effect on the next request without creating another account. Resubmission preserves previous applications and review feedback. Repeating an identical review decision does not duplicate the review or host role.
+**F1 and the Division 2 F17 event moderation workflow are implemented. F5 remains partial:** price/availability filters and full sorting requirements remain. Separate venue/session/ticket records are **F2–F4 foundations only**. The first editor handles one session and ticket category. Booking, payments, seating and Flutter screens remain outside this division.
 
 ## Architecture
 
-The project uses an MVC-style separation of presentation, request handling, business workflows, and persistence.
+Next.js 16 App Router, Node.js Route Handlers, TypeScript, React 19, Tailwind CSS 4, shadcn/ui and Supabase PostgreSQL/Auth/Storage.
 
-| Layer          | Technology and location                                                                             |
-| -------------- | --------------------------------------------------------------------------------------------------- |
-| Views          | Next.js 16 App Router, React 19, TypeScript — `src/app` and `src/components`                        |
-| Styling        | Tailwind CSS 4, shadcn/ui, Radix UI, and locally hosted Geist fonts                                 |
-| Controllers    | Node.js Route Handlers and validated JSON request boundaries — `src/controllers`                    |
-| Services       | Authentication, authorization, application submission, and review workflows — `src/services`        |
-| Repositories   | Typed database queries and RPC calls — `src/repositories`                                           |
-| Persistence    | Supabase PostgreSQL, constraints, RLS policies, and transactional functions — `supabase/migrations` |
-| Authentication | Supabase Auth with server-managed cookie sessions and verified user identity                        |
-| Testing        | Vitest, PGlite PostgreSQL, Playwright, and opt-in hosted Supabase integration tests                 |
+| Layer              | Location                                  |
+| ------------------ | ----------------------------------------- |
+| Views              | `src/app`, `src/components`               |
+| Controllers        | `src/controllers`                         |
+| Business workflows | `src/services`                            |
+| Persistence        | `src/repositories`, `supabase/migrations` |
 
-**Access control is enforced beyond the UI.** The server validates identity and reads roles from the protected `user_roles` table. Client-submitted IDs, roles, and editable Auth metadata cannot grant permissions. RLS restricts record access, while database transactions protect approval and resubmission rules. The application uses a publishable key and the caller's identity; it does not require a service-role key.
-
-See the [architecture and MVC mapping](docs/architecture.md) and [JSON API contract](docs/api.md) for implementation details.
+Authorization never trusts client-submitted roles, owner IDs or editable Auth metadata. The application uses a publishable key and caller identity, with no service-role key. Public output excludes organizer contacts and moderation notes.
 
 ## Run locally
 
-Use **Node 22.23.4** from [`.nvmrc`](.nvmrc), or supported **Node 24 LTS**, and npm.
+Use Node **22.23.4** from `.nvmrc` or supported Node **24 LTS**.
 
-1. Clone the repository and install dependencies:
+```powershell
+npm ci
+if (-not (Test-Path .env.local)) { Copy-Item .env.example .env.local }
+npm run dev
+```
 
-   ```powershell
-   git clone https://github.com/rifatpriyo/tixwix-470.git
-   cd tixwix-470
-   npm ci
-   ```
+The ignored local configuration needs:
 
-2. Create local configuration without overwriting an existing file:
+```dotenv
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLISHABLE_KEY
+APP_URL=http://127.0.0.1:3000
+```
 
-   ```powershell
-   if (-not (Test-Path .env.local)) { Copy-Item .env.example .env.local }
-   ```
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000). This checkout is configured for the existing development project. Its migrations are already applied: do not reapply creation SQL or reset the database. For a separate project, apply all migrations in order. See [setup](docs/setup.md) for Auth and administrator bootstrap. Email confirmation remains disabled for this development project.
 
-   Fill these values in `.env.local`:
+If Node is missing from PATH in this Windows workspace, the verification runtime is in ignored `.qa/node-v24.11.0-win-x64`:
 
-   ```dotenv
-   NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
-   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLISHABLE_KEY
-   APP_URL=http://127.0.0.1:3000
-   ```
-
-   `.env.local` is excluded from Git. Use a publishable key here; secret and service-role keys do not belong in application configuration.
-
-3. Use the already configured development project, or follow the [Supabase setup guide](docs/setup.md#supabase-setup) for a fresh project. The current development database already has migration `202611040001`; do not reapply its creation SQL.
-
-4. Start the application:
-
-   ```powershell
-   npm run dev
-   ```
-
-   Open **[http://127.0.0.1:3000](http://127.0.0.1:3000)**. Use the same origin as `APP_URL`.
-
-Administrator access requires the [verified-account bootstrap procedure](docs/setup.md#bootstrap-an-administrator). There are no default admin credentials or public admin-registration controls.
+```powershell
+$env:PATH = (Resolve-Path '.qa/node-v24.11.0-win-x64').Path + ';' + $env:PATH
+npm run dev
+```
 
 ## Verification
-
-The latest recorded implementation verification completed **43 tests** across four suites, plus lint, TypeScript checking, and a production build. These are recorded results from the connected implementation run; live suites are opt-in and are not part of every CI run.
-
-| Suite / check                          | Recorded result | Coverage                                                                                                        |
-| -------------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------- |
-| Unit + embedded PostgreSQL             | **29 passed**   | Validation, controllers, mocked Auth behavior, and migration/RLS/transaction checks on PGlite                   |
-| Hosted Supabase integration            | **3 passed**    | Real Auth sessions, PostgREST, concurrent submissions/reviews, protected writes, and ownership policies         |
-| Desktop/mobile browser smoke tests     | **10 passed**   | Public screens, responsive layout, navigation, and denied-access paths                                          |
-| Live browser workflow                  | **1 passed**    | Actual registration, login/logout, session persistence, application submission, admin approval, and host access |
-| ESLint / TypeScript / production build | **Passed**      | Source checks, strict types, and Next.js compilation                                                            |
-
-Run the standard checks from the repository root:
 
 ```powershell
 npm run lint
@@ -129,48 +66,36 @@ npm run typecheck
 npm test
 npm run build
 npx playwright install chromium
-npm run test:e2e
+npm run test:e2e -- --workers=2
 ```
 
-Stop any existing local server on port 3000 before browser tests; Playwright starts its own production server. [GitHub Actions](.github/workflows/ci.yml) runs the standard checks above.
-
-The separate `npm run test:integration` and `npm run test:e2e:live` commands require explicit opt-in and test configuration. Disabled suites are **skipped**, not passed; enabling the live browser suite without its credentials fails setup. They create temporary accounts in a development/test project and remove them afterward. Follow the [test setup and safety requirements](docs/setup.md#verify).
-
-The [verification report](docs/sprint-1-division-1.md#verification-evidence) records the test boundaries, executed commands, and dependency audit results. Mocked Auth tests and embedded PostgreSQL tests are distinguished from actual Supabase integration tests.
+The [Division 2 report](docs/sprint-1-division-2.md) records actual results and opt-in hosted integration/browser commands. Mocked identity and embedded PostgreSQL tests are distinguished from real Supabase tests; skipped suites are not passes. Run a production build before browser checks and free port 3000 first. Reports, credentials and local configuration remain ignored.
 
 ## Faculty demonstration
 
-Prepare a customer account and a separate administrator account using the [bootstrap guide](docs/setup.md#bootstrap-an-administrator). Use separate browser profiles for the two roles.
+Use separate approved-host and admin browser profiles, plus an incognito visitor.
 
-1. **Account lifecycle:** register, reach the customer dashboard, reload to demonstrate session persistence, then sign out and sign back in.
-2. **Application submission:** enter organizer details at `/dashboard/host-application` and show the pending state.
-3. **Feedback:** as admin, open `/admin/host-applications`, inspect the submission, and reject it with feedback.
-4. **Revision history:** as the customer, read the feedback, correct the details, and resubmit. Show that the previous submission remains available.
-5. **Approval:** as admin, approve the new submission. Refresh the customer's dashboard and open `/host` using the same account.
-6. **Authorization:** show that an ordinary customer cannot access administrator or host-only operations.
+1. At `/host`, create **Dhaka Unplugged**. Save only the title, leave, and reopen to show draft persistence.
+2. Complete a Concert event in Dhaka with a future Dhaka schedule, poster, **BDT 500 General Admission** ticket and positive capacity. Save, then submit separately.
+3. At `/admin/events`, request an entrance clarification with feedback.
+4. As host, show the feedback, correct the address, save, and resubmit.
+5. As admin, approve and publish. As visitor, combine title/category/location/date filters at `/events`, open the result, show the price, and refresh its URL.
+6. Open the host editor to show publication is unchanged; save an edit and demonstrate disappearance from search and the unavailable screen at the old public URL.
 
-For the full acceptance checklist, including duplicate-decision and database access checks, see the [connected acceptance flow](docs/setup.md#connected-acceptance-flow).
-
-## Scope and remaining work
-
-This release covers **Sprint 1, Division 1 only**, including the **host-verification portion of SRS F17**. Event moderation, event creation and discovery, ticket booking, payments, and Flutter screens remain outside this milestone.
-
-Version 0.1 prioritizes working account and organizer-onboarding workflows. The interface is preliminary; extensive UI and user-experience improvements are planned for later iterations.
-
-Before a public demonstration deployment:
-
-- Bootstrap the intended permanent administrator using a verified account UUID.
-- Configure SMTP, enable email confirmation, and verify delivery with a real mailbox. Callback handlers are implemented, but live email delivery and the confirmation-enabled signup flow remain unverified.
-- Configure and verify a Vercel preview deployment. The application currently runs locally against hosted Supabase.
+Full instructions: [Division 2 handoff](docs/sprint-1-division-2.md).
 
 ## Documentation
 
-| Document                                                  | Purpose                                                                                                |
-| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| [Setup and verification guide](docs/setup.md)             | Local configuration, Supabase migration, auth settings, admin bootstrap, tests, and preview deployment |
-| [Architecture and MVC mapping](docs/architecture.md)      | Layer responsibilities, authorization, database design, and transactional behavior                     |
-| [JSON API contract](docs/api.md)                          | Routes, permissions, payloads, validation, and error responses                                         |
-| [Division 1 progress report](docs/sprint-1-division-1.md) | Completed work, verification evidence, limitations, and remaining setup                                |
-| [Visual asset provenance](docs/assets.md)                 | Source of the landing-page imagery, fonts, icons, and README screenshot                                |
+| Document                                           | Purpose                                                        |
+| -------------------------------------------------- | -------------------------------------------------------------- |
+| [Division 2 progress](docs/sprint-1-division-2.md) | Scope, migrations, verification and faculty demo               |
+| [Event JSON API](docs/division-2-api.md)           | Endpoints, payloads, errors, permissions and publication rules |
+| [Division 1 handoff](docs/sprint-1-division-1.md)  | Historical account and host-verification record                |
+| [Account/host API](docs/api.md)                    | Existing Division 1 contract                                   |
+| [Setup](docs/setup.md)                             | Auth, bootstrap and future Vercel connection                   |
+| [Architecture](docs/architecture.md)               | Original MVC mapping                                           |
+| [Assets](docs/assets.md)                           | Imagery and font provenance                                    |
 
-**Maintainer:** [Rifat Sadeq Priyo](https://github.com/rifatpriyo) · **Course:** CSE470 · **Milestone:** Sprint 1, Division 1
+The image in `docs/images/homepage.png` is the historical Division 1 interface, not the current catalogue. The interface continues to evolve.
+
+**Maintainer:** [Rifat Sadeq Priyo](https://github.com/rifatpriyo) · **Course:** CSE470

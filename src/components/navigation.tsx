@@ -22,6 +22,14 @@ export async function Navigation() {
           TixWix<span className="text-primary">.</span>
         </Link>
         <div className="flex flex-wrap items-center gap-3 text-sm sm:gap-6">
+          <Link href="/events" className="hover:text-primary">
+            Explore events
+          </Link>
+          {viewer?.roles.includes("admin") && (
+            <Link href="/admin/events" className="hover:text-primary">
+              Review events
+            </Link>
+          )}
           {viewer ? (
             <>
               <Link href="/dashboard" className="hover:text-primary">

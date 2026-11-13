@@ -2,7 +2,7 @@
 
 ## Current scope
 
-This repository implements **Sprint 1, Division 1** only. The next division must be requested separately. Host verification is only part of F17; do not label event moderation complete.
+This repository implements **Sprint 1, Divisions 1 and 2**. The next division must be requested separately. F17 includes host verification and the Division 2 event correction/publication workflow. F5 remains partial; F2–F4 have data foundations only. Do not label all Sprint 1 requirements complete.
 
 Preserve existing work and unrelated changes. Never reset a shared/production database. Do not commit credentials, `.env.local`, generated browser reports, or privileged keys.
 

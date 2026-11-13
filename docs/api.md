@@ -29,3 +29,7 @@ The customer application endpoint never accepts an applicant ID. The server deri
 Errors use `{error:string,code?:string,fields?:Record<string,string[]>}`. Common statuses: 400 malformed request/auth error; 401 missing/invalid identity; 403 insufficient role or invalid origin; 404 unknown application; 409 pending/already-reviewed conflict; 413 oversized body; 415 unsupported content type; 422 invalid fields; 429 auth provider rate limit; 503 missing setup/unavailable account service. No upstream secret or stack trace is returned.
 
 Repeated approval or rejection with the same decision is idempotent; the original feedback remains authoritative. A different decision on an already reviewed row returns 409. The UI disables duplicate submits, but the transaction and unique indexes remain the final safeguards.
+
+# Division 2 extension
+
+Event creation, moderation, private poster and public discovery endpoints are documented in [Division 2 API](division-2-api.md). The account and host-application contract in this document remains supported.

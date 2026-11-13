@@ -44,6 +44,8 @@ test("visitors are redirected from all protected pages", async ({ page }) => {
     "/dashboard/host-application",
     "/host",
     "/admin/host-applications",
+    "/host/events/new",
+    "/admin/events",
   ]) {
     await page.goto(path);
     await expect(page).toHaveURL(/\/login$/);
@@ -57,11 +59,32 @@ test("protected JSON APIs reject anonymous users and do not cache private respon
     "/api/host",
     "/api/host-applications",
     "/api/admin/host-applications",
+    "/api/host/events",
+    "/api/admin/events",
   ]) {
     const response = await request.get(path);
     expect(response.status()).toBe(401);
     expect(response.headers()["cache-control"]).toContain("no-store");
   }
+});
+test("event filters are labelled and preserved in the URL", async ({
+  page,
+}) => {
+  await page.goto(
+    "/events?q=Unplugged&category=concert&location=Dhaka&date=2099-12-20",
+  );
+  await expect(page.getByLabel("Search by title")).toHaveValue("Unplugged");
+  await expect(page.getByLabel("Category", { exact: true })).toHaveValue(
+    "concert",
+  );
+  await expect(page.getByLabel("Location (city)")).toHaveValue("Dhaka");
+  await expect(page.getByLabel("Date (Asia/Dhaka)")).toHaveValue("2099-12-20");
+  await page.reload();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
 });
 test("registration rejects forged roles and cross-origin requests", async ({
   request,

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     template: "%s | TixWix",
   },
   description:
-    "Your TixWix account connects you to the world of live events. Apply to become an approved organizer.",
+    "Discover upcoming events in Dhaka and beyond, or create and publish your next event as an approved organizer.",
 };
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -35,7 +35,7 @@ export default function RootLayout({
         <footer className="border-t">
           <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-3 px-5 py-6 text-xs text-muted-foreground sm:px-8">
             <span>© TixWix · Made for shared experiences.</span>
-            <span>Accounts & organizer onboarding</span>
+            <span>Discover events. Share experiences.</span>
           </div>
         </footer>
       </body>

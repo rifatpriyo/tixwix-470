@@ -3,9 +3,25 @@ import Link from "next/link";
 import { ArrowRightIcon, CheckCircledIcon } from "@radix-ui/react-icons";
 import { buttonVariants } from "@/components/ui/button";
 import { pageContext } from "@/services/context";
+import { publicEvents } from "@/services/events";
+import { catalogueSchema, type EventDetail } from "@/lib/events";
+import { supabaseConfigured } from "@/lib/config";
+import { EventCards } from "@/components/event-info";
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const context = await pageContext();
+  let events: EventDetail[] = [];
+  let catalogueError = false;
+  if (supabaseConfigured()) {
+    try {
+      events = (
+        await publicEvents().catalogue(catalogueSchema.parse({}))
+      ).events.slice(0, 3);
+    } catch {
+      catalogueError = true;
+    }
+  }
   return (
     <div className="mx-auto max-w-6xl px-5 sm:px-8">
       <section className="grid items-center gap-10 py-10 md:grid-cols-[1.15fr_1fr] md:gap-14 md:py-14">
@@ -54,6 +70,21 @@ export default async function Home() {
             </p>
           </div>
         </div>
+      </section>
+      <section className="border-t py-12">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+          <h2 className="text-2xl font-semibold">Upcoming events</h2>
+          <Link href="/events" className="text-link">
+            Explore all events
+          </Link>
+        </div>
+        {catalogueError ? (
+          <p role="alert">
+            Events are temporarily unavailable. Please try again.
+          </p>
+        ) : (
+          <EventCards events={events} />
+        )}
       </section>
       <section className="grid gap-8 border-t py-12 md:grid-cols-[1fr_1.5fr]">
         <div>

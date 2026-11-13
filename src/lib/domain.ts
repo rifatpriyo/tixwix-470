@@ -1,3 +1,4 @@
+import type { EventDetail, EventRecord, EventReview } from "./events";
 export type Role = "customer" | "host" | "admin";
 export type ApplicationStatus = "pending" | "approved" | "rejected";
 export type Profile = {
@@ -59,9 +60,43 @@ export type Database = {
       host_applications: Table<HostApplication>;
       host_profiles: Table<HostProfile>;
       host_application_reviews: Table<Review>;
+      events: Table<EventRecord>;
+      event_reviews: Table<EventReview>;
     };
-    Views: { [_ in never]: never };
+    Views: { event_details: { Row: EventDetail; Relationships: [] } };
     Functions: {
+      save_event: {
+        Args: {
+          p_id: string | null;
+          p_version: number | null;
+          p_data: Record<string, unknown>;
+        };
+        Returns: EventRecord;
+      };
+      transition_event: {
+        Args: {
+          p_id: string;
+          p_version: number;
+          p_action: string;
+          p_feedback: string | null;
+        };
+        Returns: EventRecord;
+      };
+      search_events: {
+        Args: {
+          p_query: string;
+          p_category: string;
+          p_location: string;
+          p_date: string | null;
+          p_page: number;
+        };
+        Returns: {
+          events: EventDetail[];
+          total: number;
+          page: number;
+          pageSize: number;
+        };
+      };
       has_role: { Args: { requested_role: string }; Returns: boolean };
       submit_host_application: {
         Args: {

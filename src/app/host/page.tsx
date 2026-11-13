@@ -2,9 +2,24 @@ import Link from "next/link";
 import { protectedPage } from "@/services/context";
 import { date } from "@/components/application-info";
 import { Badge } from "@/components/ui/badge";
+import { ManagedEvents } from "@/components/managed-events";
+import { EventRepository } from "@/repositories/events";
+import { buttonVariants } from "@/components/ui/button";
+import { z } from "zod";
 export const metadata = { title: "Host dashboard" };
-export default async function HostDashboard() {
-  const { accounts, viewer } = await protectedPage("host");
+export default async function HostDashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { accounts, viewer, db } = await protectedPage("host");
+  const page = z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(1000)
+    .catch(1)
+    .parse((await searchParams).page ?? 1);
   const host = await accounts.host(viewer.id);
   return (
     <div className="page">
@@ -17,6 +32,19 @@ export default async function HostDashboard() {
       <p className="mt-3 text-muted-foreground">
         Welcome to your organizer workspace.
       </p>
+      <section className="mt-8">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h2 className="text-2xl font-semibold">My Events</h2>
+          <Link href="/host/events/new" className={buttonVariants()}>
+            Create event
+          </Link>
+        </div>
+        <ManagedEvents
+          repository={new EventRepository(db)}
+          hostId={viewer.id}
+          page={page}
+        />
+      </section>
       <div className="mt-8 grid gap-6 md:grid-cols-2">
         <section className="panel">
           <h2 className="mb-6 text-xl font-semibold">
@@ -55,8 +83,8 @@ export default async function HostDashboard() {
             You’re ready for what’s next.
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Your host access is active. Event creation and management will
-            become available in a later release.
+            Your host access is active. Create a draft, submit it for review,
+            and follow the administrator’s feedback here.
           </p>
           <p className="mt-4 text-sm">
             You can continue using your customer account with the same sign-in.

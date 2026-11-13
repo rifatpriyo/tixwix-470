@@ -1,5 +1,7 @@
 # Sprint 1 Division 1 progress
 
+This is the historical Division 1 record. See [Division 2 progress](sprint-1-division-2.md) for event creation, moderation, public discovery, and newer verification results.
+
 **Project version: 0.1** (`0.1.0` in package metadata).
 
 Implementation verification record: 4 November 2026 (Asia/Dhaka). Documentation refreshed: 5 November 2026.

@@ -10,6 +10,8 @@ export default defineConfig({
     },
   },
   test: {
+    // PGlite allocates a PostgreSQL WASM heap per worker; keep local runs bounded.
+    maxWorkers: 1,
     include: ["tests/unit/**/*.test.ts", "tests/database/**/*.test.ts"],
     testTimeout: 30000,
     hookTimeout: 60000,
