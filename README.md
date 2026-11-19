@@ -1,6 +1,6 @@
 # TixWix
 
-**CSE470 · Sprint 1, Divisions 1 and 2**
+**CSE470 · Sprint 1 Divisions 1–2 and Sprint 2 Division 1**
 
 TixWix supports **approved host → event draft → correction → resubmission → administrator publication → public discovery**, building on Division 1 registration, roles, host verification and dashboards.
 
@@ -16,7 +16,7 @@ Division 2 is implemented and its incremental migrations are applied to the conf
 - Server identity checks, protected database roles, RLS, restricted grants, transactional writes and immutable private Storage objects.
 - JSON APIs shared by the website and a future Flutter client.
 
-**F1 and the Division 2 F17 event moderation workflow are implemented. F5 remains partial:** price/availability filters and full sorting requirements remain. Separate venue/session/ticket records are **F2–F4 foundations only**. The first editor handles one session and ticket category. Booking, payments, seating and Flutter screens remain outside this division.
+**F1 and the Division 2 F17 event moderation workflow are implemented. F5 remains partial:** price/availability filters and full sorting requirements remain. Separate venue/session/ticket records are **F2–F4 foundations only**. The first editor handles one session and ticket category. Sprint 2 Division 1 adds seating and pending reservations; payment and Flutter screens remain outside the current implementation. See the [reservation handoff](docs/sprint-2-division-1.md) for setup and verification status.
 
 ## Architecture
 
@@ -99,3 +99,7 @@ Full instructions: [Division 2 handoff](docs/sprint-1-division-2.md).
 The image in `docs/images/homepage.png` is the historical Division 1 interface, not the current catalogue. The interface continues to evolve.
 
 **Maintainer:** [Rifat Sadeq Priyo](https://github.com/rifatpriyo) · **Course:** CSE470
+
+## Sprint 2 Division 1
+
+Session-specific seat selection, an on-demand demo-hall 3D preview, and expiring pending reservations are implemented in this working tree. Read the [Sprint 2 handoff](docs/sprint-2-division-1.md) for the migration, isolated demo setup, API, and actual verification results. Full authenticated reservation acceptance requires the local Supabase setup described there. F8 remains partial; paid confirmation and ticket delivery are not included.

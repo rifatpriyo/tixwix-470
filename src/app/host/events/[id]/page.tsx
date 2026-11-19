@@ -1,3 +1,4 @@
+import { SeatingEditor } from "@/components/seating-editor";
 import { notFound } from "next/navigation";
 import { protectedPage } from "@/services/context";
 import { EventRepository } from "@/repositories/events";
@@ -23,7 +24,8 @@ export default async function EditEvent({
           <EventPoster event={event} />
         </div>
       )}
-      <EventEditor key={event.id} event={event} />
+      <EventEditor key={`${event.id}:${event.version}`} event={event} />
+      <SeatingEditor event={event} />
       <EventHistory reviews={await repo.history(id)} />
     </div>
   );

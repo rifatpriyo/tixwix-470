@@ -73,3 +73,8 @@ Use separate browser profiles for an approved host and an administrator, plus an
 6. Open the published host editor: it remains public. Explain the withdrawal warning, save an edit, then show that search no longer finds it and the old detail URL shows **Event unavailable**. Its public JSON and poster endpoints return 404.
 
 Vercel: this checkout has no existing linked/authorized preview workflow (`.vercel` is absent; the Division 1 handoff records Vercel as unconnected). No deployment or preview URL is claimed. A Vercel account/project connection is still needed for a hosted web preview; local web execution uses the hosted development Supabase backend.
+
+
+## Sprint 2 continuation
+
+The local Sprint 2 Division 1 implementation and its own verification record are documented in [the reservation handoff](sprint-2-division-1.md). The historical Sprint 1 results above do not establish Sprint 2 acceptance.

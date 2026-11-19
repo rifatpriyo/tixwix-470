@@ -2,6 +2,8 @@ import { defineConfig } from "vitest/config";
 import { fileURLToPath } from "node:url";
 export default defineConfig({
   resolve: {
+    // Keep a Windows drive alias intact when the physical path contains '#'.
+    preserveSymlinks: true,
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
       "server-only": fileURLToPath(

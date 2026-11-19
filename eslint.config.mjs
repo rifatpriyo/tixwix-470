@@ -6,6 +6,7 @@ import hooks from "eslint-plugin-react-hooks";
 export default defineConfig([
   globalIgnores([
     ".next/**",
+    ".qa/**",
     "next-env.d.ts",
     "playwright-report/**",
     "test-results/**",

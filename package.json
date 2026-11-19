@@ -14,7 +14,9 @@
     "test": "vitest run",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:e2e": "playwright test",
-    "test:e2e:live": "playwright test --config playwright.live.config.ts"
+    "test:e2e:live": "playwright test --config playwright.live.config.ts",
+    "test:postgres": "node tests/native/reservations.mjs",
+    "test:preview": "node scripts/verify-preview.mjs"
   },
   "dependencies": {
     "@fontsource/geist": "^5.3.0",
@@ -29,6 +31,7 @@
     "react-dom": "19.3.1",
     "server-only": "^0.0.1",
     "tailwind-merge": "^3.0.0",
+    "three": "0.187.0",
     "zod": "^4.0.0"
   },
   "devDependencies": {
@@ -38,15 +41,20 @@
     "@playwright/test": "^1.58.0",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.0.0",
+    "@types/pg": "8.23.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@types/three": "0.187.0",
+    "embedded-postgres": "18.6.0-beta.19",
     "eslint": "^10.14.0",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "pg": "8.23.1",
     "prettier": "^3.9.10",
     "tailwindcss": "^4.0.0",
     "tw-animate-css": "^1.0.0",
     "typescript": "^5.9.0",
     "typescript-eslint": "^8.72.1",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.0",
+    "esbuild": "0.25.12"
   }
 }

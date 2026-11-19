@@ -40,6 +40,7 @@ test("landing and authentication screens are usable without horizontal overflow"
 });
 test("visitors are redirected from all protected pages", async ({ page }) => {
   for (const path of [
+    "/checkout/11111111-1111-4111-8111-111111111111",
     "/dashboard",
     "/dashboard/host-application",
     "/host",
@@ -55,6 +56,7 @@ test("protected JSON APIs reject anonymous users and do not cache private respon
   request,
 }) => {
   for (const path of [
+    "/api/reservations/11111111-1111-4111-8111-111111111111",
     "/api/me",
     "/api/host",
     "/api/host-applications",

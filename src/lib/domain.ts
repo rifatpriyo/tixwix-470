@@ -1,3 +1,4 @@
+import type { Inventory, Reservation } from "./reservations";
 import type { EventDetail, EventRecord, EventReview } from "./events";
 export type Role = "customer" | "host" | "admin";
 export type ApplicationStatus = "pending" | "approved" | "rejected";
@@ -65,6 +66,30 @@ export type Database = {
     };
     Views: { event_details: { Row: EventDetail; Relationships: [] } };
     Functions: {
+      session_availability: { Args: { p_session: string }; Returns: Inventory };
+      create_reservation: {
+        Args: {
+          p_session: string;
+          p_key: string;
+          p_seats: string[];
+          p_ga: { category_id: string; quantity: number }[];
+        };
+        Returns: Reservation;
+      };
+      reservation: {
+        Args: { p_id: string; p_release: boolean };
+        Returns: Reservation;
+      };
+      assign_seating: {
+        Args: {
+          p_event: string;
+          p_version: number;
+          p_category: string;
+          p_rows: number;
+          p_columns: number;
+        };
+        Returns: undefined;
+      };
       save_event: {
         Args: {
           p_id: string | null;

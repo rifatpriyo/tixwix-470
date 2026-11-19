@@ -1,3 +1,4 @@
+import { SeatBooking } from "@/components/seat-booking";
 import { notFound } from "next/navigation";
 import { publicEvents } from "@/services/events";
 import { EventInfo } from "@/components/event-info";
@@ -14,9 +15,7 @@ export default async function EventPage({
   return (
     <div className="page">
       <EventInfo event={event} />
-      <p className="mt-8 rounded-lg bg-secondary p-5">
-        Ticket booking will be available in a later release.
-      </p>
+      <SeatBooking event={event} />
     </div>
   );
 }
