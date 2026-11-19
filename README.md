@@ -4,7 +4,7 @@
 
 TixWix supports **approved host → event draft → correction → resubmission → administrator publication → public discovery**, building on Division 1 registration, roles, host verification and dashboards.
 
-Division 2 is implemented and its incremental migrations are applied to the confirmed development Supabase project `euuastddghdsyodcnfhp`. The application runs locally against that backend. Vercel preview deployment remains pending.
+Sprint 1 Division 2 is implemented and its incremental migrations were applied to the development Supabase project `euuastddghdsyodcnfhp`. Sprint 2 Division 1 adds the reservation workflow described below; its new migration has been verified in isolated databases and has not been applied to the shared project. Vercel preview deployment remains pending.
 
 ## Features and scope
 
@@ -49,7 +49,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLISHABLE_KEY
 APP_URL=http://127.0.0.1:3000
 ```
 
-Open [http://127.0.0.1:3000](http://127.0.0.1:3000). This checkout is configured for the existing development project. Its migrations are already applied: do not reapply creation SQL or reset the database. For a separate project, apply all migrations in order. See [setup](docs/setup.md) for Auth and administrator bootstrap. Email confirmation remains disabled for this development project.
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000). Configure this checkout with your local or development Supabase URL and publishable key. The shared project already has the Sprint 1 migrations; the Sprint 2 reservation migration still needs to be applied to your local or isolated development database. Do not reapply creation SQL or reset shared data. For a separate project, apply all migrations in order. See [setup](docs/setup.md) for Auth and administrator bootstrap. Email confirmation remains disabled for this development project.
 
 If Node is missing from PATH in this Windows workspace, the verification runtime is in ignored `.qa/node-v24.11.0-win-x64`:
 
@@ -102,4 +102,18 @@ The image in `docs/images/homepage.png` is the historical Division 1 interface, 
 
 ## Sprint 2 Division 1
 
-Session-specific seat selection, an on-demand demo-hall 3D preview, and expiring pending reservations are implemented in this working tree. Read the [Sprint 2 handoff](docs/sprint-2-division-1.md) for the migration, isolated demo setup, API, and actual verification results. Full authenticated reservation acceptance requires the local Supabase setup described there. F8 remains partial; paid confirmation and ticket delivery are not included.
+### Session contributions — 19 November 2026
+
+Implemented by [mercyous14](https://github.com/mercyous14), extending the team's existing event creation, moderation and discovery workflows:
+
+- Session-specific numbered seats and general-admission inventory, with host controls for assigning a small concert-hall layout.
+- Keyboard-accessible seat selection and an on-demand Three.js audience-view preview, including different front/rear viewpoints and a fallback when 3D is unavailable.
+- Atomic 10-minute reservations with pending checkout, stored BDT price breakdowns, retry protection, refresh recovery, cancellation and database-clock expiry.
+- Availability updates, owner-only reservation access, and safeguards against host edits that would invalidate allocated inventory.
+- JSON APIs for future Flutter/payment integration, an additive migration, reproducible local demo data, and database/browser verification.
+
+**Verification:** lint, TypeScript and the production build passed; 42 unit/embedded-database tests, 13 native PostgreSQL checks, 12 desktop/mobile browser tests and 2 preview checks passed. The successful browser run used `npm run test:e2e -- --workers=1 --timeout=90000`. Four real Supabase integration tests and the authenticated two-customer browser test were skipped because local services and credentials were unavailable; those are not passes.
+
+**Migration:** `supabase/migrations/20261117164313_session_reservations.sql`. Apply it only after reviewing the target database's existing migration history. This session did not modify the shared Supabase database.
+
+Read the [Sprint 2 handoff](docs/sprint-2-division-1.md) for setup, the two-browser demo, API contracts, changed files and the Windows test-path workaround. F6/F7 are implemented with the verification limits above. **F8 remains partial:** payment confirmation, digital tickets and QR check-in belong to Sprint 2 Division 2. The earlier Sprint 1 scope and handoff remain documented above.
